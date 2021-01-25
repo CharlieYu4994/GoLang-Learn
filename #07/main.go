@@ -14,10 +14,9 @@ var (
 )
 
 func statName(name string) (sum int) {
-	tmp := []byte(name)
-	for _, litter := range tmp {
+	for _, litter := range name {
 		if litter == 'e' {
-			sum++
+			sum += 1
 		} else if litter == 'i' {
 			sum += 2
 		} else if litter == 'o' {
