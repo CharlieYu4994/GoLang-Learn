@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type school struct {
 	Name    string
@@ -20,16 +23,16 @@ func (s *school) addClass(class *class) {
 
 func (s *school) addStudent(cID int, name string, age int, score score) bool {
 	status, class := s.getClass(cID)
-	if !status {
-		return false
+	if status {
+		class.addStudent(name, age, score)
+		return true
 	}
-	class.addStudent(name, age, score)
-	return true
+	return false
 }
 
 func (s *school) getStudent(cID, ID int) (bool, *student) {
-	class, ok := s.Classes[cID]
-	if ok {
+	status, class := s.getClass(cID)
+	if status {
 		student, ok := class.Students[ID]
 		if ok {
 			return true, student
@@ -108,29 +111,29 @@ func newScore(chinese int, maths int, english int) score {
 
 func altStudent(sch *school, cID int, ID int, arg interface{}) bool {
 	status, student := sch.getStudent(cID, ID)
-	if !status {
-		return false
+	if status {
+		switch tmp := arg.(type) {
+		case int:
+			student.Age = tmp
+		case string:
+			student.Name = tmp
+		case score:
+			student.Score = tmp
+		default:
+			return false
+		}
+		return true
 	}
-	switch tmp := arg.(type) {
-	case int:
-		student.Age = tmp
-	case string:
-		student.Name = tmp
-	case score:
-		student.Score = tmp
-	default:
-		return false
-	}
-	return true
+	return false
 }
 
 func altClass(sch *school, cID int, name string) bool {
 	status, class := sch.getClass(cID)
-	if !status {
-		return false
+	if status {
+		class.Name = name
+		return true
 	}
-	class.Name = name
-	return true
+	return false
 }
 
 func initClass(cID int, name string, stdNum int) *class {
@@ -144,6 +147,7 @@ func main() {
 	sch.addStudent(8, "TEST", 17, newScore(100, 100, 100))
 
 	fmt.Println(sch.getClass(8))
-	_ = altClass(sch, 8, "123")
-	fmt.Println(sch.getClass(8))
+	fmt.Println(sch.getStudent(8, 1))
+	str, _ := json.Marshal(sch)
+	fmt.Printf("%s", str)
 }
